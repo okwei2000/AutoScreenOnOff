@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.os.*;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.OrientationEventListener;
 import android.widget.RemoteViews;
@@ -43,6 +44,10 @@ public class SensorMonitorService extends Service implements
 
     // schedule
     AlarmManager am;
+    
+    //default screen timeout
+    private int defTimeOut=15;
+    
     private AlarmManager getAlarmManager(){
         if(am==null)
         {
@@ -274,6 +279,9 @@ public class SensorMonitorService extends Service implements
 	public void onCreate() {
 		super.onCreate();
 
+		defTimeOut = Settings.System.getInt(getContentResolver(), 
+                Settings.System.SCREEN_OFF_TIMEOUT, 15000);
+		
 		deviceManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
 		mDeviceAdmin = new ComponentName(this, TurnOffReceiver.class);
 
@@ -525,6 +533,7 @@ public class SensorMonitorService extends Service implements
     }
 
     private void turnOn(){
+    	Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT, this.defTimeOut);
         if (!screenLock.isHeld()) {
             screenLock.acquire();
             /*
@@ -554,7 +563,8 @@ public class SensorMonitorService extends Service implements
         CV.logv("sensor: turn off thread");
         if(screenLock.isHeld())
             screenLock.release();
-        deviceManager.lockNow();
+        //deviceManager.lockNow();
+        Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT, 2000);
         playCloseSound();
         vibrateWhileClose();
 
