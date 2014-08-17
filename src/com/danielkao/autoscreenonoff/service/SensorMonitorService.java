@@ -466,6 +466,8 @@ public class SensorMonitorService extends Service implements
                 }
                 // should turn on
                 else {
+                	//reset screen timeout regardless of if screen is on or off
+                	Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT, this.defTimeOut);
                     if (!mPowerManager.isScreenOn()) {
                         long timeout = (long) CV.getPrefTimeoutUnlock(this);
                         if(timeout==0)
@@ -533,7 +535,6 @@ public class SensorMonitorService extends Service implements
     }
 
     private void turnOn(){
-    	Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT, this.defTimeOut);
         if (!screenLock.isHeld()) {
             screenLock.acquire();
             /*
